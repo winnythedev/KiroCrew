@@ -38,6 +38,7 @@ from typing import Any, Callable
 from kiro_crew import platform_compat
 from kiro_crew.atomic_write import replace_with_retry
 from kiro_crew.eval.arms import ARMS, Arm, ArmOutcome, Caps, NotBuiltArm, operator_kiro_cli
+from kiro_crew.user_json import loads_user_json
 
 #: Per-tier limits and weekly runs per case (§3.1): timeout, credit and USD caps, k.
 TIERS: dict[str, dict[str, float]] = {
@@ -134,7 +135,7 @@ class Case:
 def load_case(path: Path) -> Case:
     """Read and check ``path/case.json`` and the files the runner needs beside it."""
     try:
-        data = json.loads((path / "case.json").read_text(encoding="utf-8"))
+        data = loads_user_json((path / "case.json").read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise CaseError(f"{path.name}: unreadable case.json: {exc}") from None
     if not isinstance(data, dict):

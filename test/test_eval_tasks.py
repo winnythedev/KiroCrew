@@ -127,6 +127,24 @@ def test_a_bad_case_json_is_named(tmp_path, over, words):
     assert words in str(err.value)
 
 
+def test_a_case_json_saved_with_a_utf8_bom_loads(tmp_path):
+    case_dir = _case_copy(tmp_path)
+    case_json = case_dir / "case.json"
+    case_json.write_bytes(b"\xef\xbb\xbf" + case_json.read_bytes())
+    try:
+        case = tasks.load_case(case_dir)
+    except tasks.CaseError as exc:
+        pytest.fail(f"a case.json saved with a BOM was refused: {exc}")
+    assert case.id == "S1-image-name-cap"
+
+
+def test_a_case_json_that_is_not_json_is_unreadable(tmp_path):
+    case_dir = _case_copy(tmp_path)
+    (case_dir / "case.json").write_text("{not json", encoding="utf-8")
+    with pytest.raises(tasks.CaseError, match="S1-image-name-cap: unreadable case.json: "):
+        tasks.load_case(case_dir)
+
+
 def test_an_unknown_case_id_is_refused():
     with pytest.raises(tasks.CaseError, match="no such case: nope"):
         tasks.find_cases(SUITE, "all", ["nope"])
