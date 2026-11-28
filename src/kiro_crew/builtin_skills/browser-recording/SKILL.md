@@ -45,12 +45,16 @@ how it was produced unstated.
 project's own Playwright install**, records the session as webm, and — when
 ffmpeg is available — converts it to mp4 and a palette-optimized GIF.
 
+The command is one line, so it runs as written in bash and in Windows
+PowerShell, where a trailing backslash continues no line. Each shell spells
+the scratch variable its own way:
+
+```bash
+python3 <skill-dir>/scripts/record_browser.py --url http://127.0.0.1:5173/settings --scenario $KIROCREW_SCRATCH/demo-scenario.mjs --project /path/to/frontend --size 1280x800 --name settings-flow --out $KIROCREW_SCRATCH/rec
 ```
-python3 <skill-dir>/scripts/record_browser.py \
-  --url http://127.0.0.1:5173/settings \
-  --scenario $KIROCREW_SCRATCH/demo-scenario.mjs \
-  --project /path/to/frontend \
-  --size 1280x800 --name settings-flow --out $KIROCREW_SCRATCH/rec
+
+```powershell
+python3 <skill-dir>/scripts/record_browser.py --url http://127.0.0.1:5173/settings --scenario $env:KIROCREW_SCRATCH/demo-scenario.mjs --project C:\path\to\frontend --size 1280x800 --name settings-flow --out $env:KIROCREW_SCRATCH/rec
 ```
 
 Two optional timing flags: `--settle-ms` (default 600) waits after page load

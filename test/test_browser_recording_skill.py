@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -61,6 +62,21 @@ class TestSkillDoc:
         assert "never auto-installed" in body
         assert "npx playwright install chromium" in body
         assert "ffmpeg" in body
+
+    def test_run_command_parses_in_bash_and_powershell(self) -> None:
+        """The agent's shell on Windows is PowerShell, where a trailing backslash
+        continues no line and the scratch variable is ``$env:KIROCREW_SCRATCH``."""
+        body = SKILL.read_text(encoding="utf-8")
+        fences = re.findall(r"^```(\w*)\n(.*?)^```", body, flags=re.S | re.M)
+        runs = {lang: text for lang, text in fences if "record_browser.py" in text}
+        assert set(runs) == {"bash", "powershell"}, f"run command fences: {sorted(runs)}"
+        for lang, text in runs.items():
+            lines = text.splitlines()
+            assert len(lines) == 1, f"{lang} run command spans {len(lines)} lines"
+            assert not lines[0].endswith("\\"), f"{lang} run command ends in a backslash"
+        assert "$KIROCREW_SCRATCH/" in runs["bash"]
+        assert "$env:KIROCREW_SCRATCH/" in runs["powershell"]
+        assert "$KIROCREW_SCRATCH/" not in runs["powershell"]
 
     def test_driver_and_runner_ship_together(self) -> None:
         assert RUNNER.is_file()
